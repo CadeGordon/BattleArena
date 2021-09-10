@@ -29,6 +29,8 @@ namespace BattleArena
         /// </summary>
         public void Run()
         {
+            Start();
+
         }
 
         /// <summary>
@@ -36,6 +38,7 @@ namespace BattleArena
         /// </summary>
         public void Start()
         {
+            Console.WriteLine("Welcome to the BATTLE ARENA!!!! do you have what it takes to survive!!??");
         }
 
         /// <summary>
@@ -146,6 +149,9 @@ namespace BattleArena
         /// <returns>The amount of damage done to the defender</returns>
         float CalculateDamage(float attackPower, float defensePower)
         {
+
+
+            return attackPower;
         }
 
         /// <summary>
@@ -156,6 +162,8 @@ namespace BattleArena
         /// <returns>The amount of damage done to the defender</returns>
         public float Attack(ref Character attacker, ref Character defender)
         {
+
+            return 0;
         }
 
         /// <summary>
