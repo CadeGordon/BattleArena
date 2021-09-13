@@ -15,14 +15,30 @@ namespace BattleArena
         public float defensePower;
     }
 
+
+
     class Game
     {
+        string playerName = "";
         bool gameOver;
         int currentScene;
         Character player;
         Character[] enemies;
         private int currentEnemyIndex = 0;
         private Character currentEnemy;
+
+        //Playable Characters
+        Character Batman;
+        Character Robin;
+
+
+        //Bad guys
+        Character MrFreeze;
+        Character Joker;
+        Character Riddler;
+
+        
+        
 
         /// <summary>
         /// Function that starts the main game loop
@@ -31,6 +47,8 @@ namespace BattleArena
         {
             Start();
 
+            
+            
         }
 
         /// <summary>
@@ -38,7 +56,36 @@ namespace BattleArena
         /// </summary>
         public void Start()
         {
-            Console.WriteLine("Welcome to the BATTLE ARENA!!!! do you have what it takes to survive!!??");
+            //initalzie Characters
+            Batman.name = "Batman";
+            Batman.health = 200.0f;
+            Batman.attackPower = 150.0f;
+            Batman.defensePower = 125.0f;
+
+            Robin.name = "Robin";
+            Robin.health = 150.0f;
+            Robin.attackPower = 100.0f;
+            Robin.defensePower = 95;
+
+            MrFreeze.name = "Mr.Freeze";
+            MrFreeze.health = 85.0f;
+            MrFreeze.attackPower = 75.0f;
+            MrFreeze.defensePower = 70.0f;
+
+            Joker.name = "Joker";
+            Joker.health = 75.0f;
+            Joker.attackPower = 65.0f;
+            Joker.health = 60.0f;
+
+            Riddler.name = "Riddler";
+            Riddler.health = 50.0f;
+            Riddler.attackPower = 40.0f;
+            Riddler.defensePower = 35.0f;
+
+
+            GetPlayerName();
+            CharacterSelection();
+            Battle();
         }
 
         /// <summary>
@@ -46,6 +93,9 @@ namespace BattleArena
         /// </summary>
         public void Update()
         {
+            DisplayCurrentScene();
+            Console.Clear();
+
         }
 
         /// <summary>
@@ -53,6 +103,9 @@ namespace BattleArena
         /// </summary>
         public void End()
         {
+
+            Console.WriteLine("add cool words later");
+
         }
 
         /// <summary>
@@ -107,6 +160,10 @@ namespace BattleArena
         /// </summary>
         void DisplayCurrentScene()
         {
+
+            
+
+
         }
 
         /// <summary>
@@ -114,6 +171,10 @@ namespace BattleArena
         /// </summary>
         void DisplayMainMenu()
         {
+
+            GetPlayerName();
+            CharacterSelection();
+
         }
 
         /// <summary>
@@ -122,6 +183,17 @@ namespace BattleArena
         /// </summary>
         void GetPlayerName()
         {
+            string input = "";
+            Console.WriteLine("Welcome! Please enter your name.");
+            playerName = Console.ReadLine();
+            Console.WriteLine("You have entered, " + playerName );
+            GetInput("are you sure you want to keep this name?", "Yes", "No");
+            if (input == "1")
+            {
+                Console.WriteLine("welcome, " + playerName);
+            }
+           
+            
 
         }
 
@@ -131,6 +203,10 @@ namespace BattleArena
         /// </summary>
         public void CharacterSelection()
         {
+            
+            GetInput("Choose your character", "Batman", "Robin");
+            
+            
         }
 
         /// <summary>
@@ -139,6 +215,14 @@ namespace BattleArena
         /// <param name="character">The character that will have its stats shown</param>
         void DisplayStats(Character character)
         {
+
+            Console.WriteLine("Name: " + character.name);
+            Console.WriteLine("Health: " + character.health);
+            Console.WriteLine("Attack: " + character.attackPower);
+            Console.WriteLine("Defense: " + character.defensePower);
+
+
+
         }
 
         /// <summary>
@@ -149,10 +233,16 @@ namespace BattleArena
         /// <returns>The amount of damage done to the defender</returns>
         float CalculateDamage(float attackPower, float defensePower)
         {
+            float damage = attackPower - defensePower;
+            if (damage <= 0)
+            {
+                damage = 0;
+            }
 
-
-            return attackPower;
+            return damage;
         }
+
+        
 
         /// <summary>
         /// Deals damage to a character based on an attacker's attack power
@@ -162,8 +252,11 @@ namespace BattleArena
         /// <returns>The amount of damage done to the defender</returns>
         public float Attack(ref Character attacker, ref Character defender)
         {
-
-            return 0;
+            float damagetaken = CalculateDamage(attacker.attackPower, defender.defensePower);
+            defender.health -= damagetaken;
+            Console.WriteLine(defender.name + " has taken " + damagetaken);
+            return damagetaken;
+            
         }
 
         /// <summary>
@@ -171,6 +264,27 @@ namespace BattleArena
         /// </summary>
         public void Battle()
         {
+            string matchResult = "No Contest";
+            while(Batman.health > 0 && MrFreeze.health > 0)
+            {
+                DisplayStats(Batman);
+
+                DisplayStats(MrFreeze);
+
+                float damagetaken = Attack(ref Batman, ref MrFreeze);
+                Console.WriteLine(Batman.name + " has taken " + damagetaken);
+
+                damagetaken = Attack(ref MrFreeze, ref Batman);
+                Console.WriteLine(Batman.name + " has taken " + damagetaken);
+
+                Console.ReadKey();
+                Console.Clear();
+
+                
+            }
+            
+
+
         }
 
         /// <summary>
