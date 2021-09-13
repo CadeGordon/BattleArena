@@ -4,11 +4,16 @@ using System.Text;
 
 namespace BattleArena
 {
+    //Test
+
+
     /// <summary>
     /// Represents any entity that exists in game
     /// </summary>
     struct Character
     {
+
+
         public string name;
         public float health;
         public float attackPower;
