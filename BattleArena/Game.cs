@@ -32,15 +32,7 @@ namespace BattleArena
         private int currentEnemyIndex = 0;
         private Character currentEnemy;
 
-        //Playable Characters
-        Character Batman;
-        Character Robin;
-
-
-        //Bad guys
-        Character MrFreeze;
-        Character Joker;
-        Character Riddler;
+        
 
         
         
@@ -52,8 +44,12 @@ namespace BattleArena
         {
             Start();
 
-            
-            
+            while (!gameOver)
+            {
+                Update();
+            }
+
+            End();
         }
 
         /// <summary>
@@ -61,36 +57,20 @@ namespace BattleArena
         /// </summary>
         public void Start()
         {
-            //initalzie Characters
-            Batman.name = "Batman";
-            Batman.health = 200.0f;
-            Batman.attackPower = 150.0f;
-            Batman.defensePower = 125.0f;
-
-            Robin.name = "Robin";
-            Robin.health = 150.0f;
-            Robin.attackPower = 100.0f;
-            Robin.defensePower = 95;
-
-            MrFreeze.name = "Mr.Freeze";
-            MrFreeze.health = 85.0f;
-            MrFreeze.attackPower = 75.0f;
-            MrFreeze.defensePower = 70.0f;
-
-            Joker.name = "Joker";
-            Joker.health = 75.0f;
-            Joker.attackPower = 65.0f;
-            Joker.health = 60.0f;
-
-            Riddler.name = "Riddler";
-            Riddler.health = 50.0f;
-            Riddler.attackPower = 40.0f;
-            Riddler.defensePower = 35.0f;
+            gameOver = false;
+            currentScene = 0;
+            currentEnemyIndex = 0;
 
 
-            GetPlayerName();
-            CharacterSelection();
-            Battle();
+            Character riddler = new Character { name = "Riddler", health = 50, attackPower = 180, defensePower = 35 };
+
+            Character mrfreeze = new Character { name = "Mr.Freeze", health = 85, attackPower = 175, defensePower = 70 };
+
+            Character joker = new Character { name = "Joker", health = 120, attackPower = 195, defensePower = 60 };
+
+            enemies = new Character[] { riddler, mrfreeze, joker };
+
+            currentEnemy = enemies[currentEnemyIndex];
         }
 
         /// <summary>
@@ -99,7 +79,7 @@ namespace BattleArena
         public void Update()
         {
             DisplayCurrentScene();
-            Console.Clear();
+            
 
         }
 
@@ -109,7 +89,7 @@ namespace BattleArena
         public void End()
         {
 
-            Console.WriteLine("add cool words later");
+            Console.WriteLine("you saved gotham!!!");
 
         }
 
@@ -165,7 +145,23 @@ namespace BattleArena
         /// </summary>
         void DisplayCurrentScene()
         {
-
+            switch (currentScene)
+            {
+                case 0:
+                    GetPlayerName();
+                    break;
+                case 1:
+                    CharacterSelection();
+                    break;
+                case 2:
+                    Battle();
+                    CheckBattleResults();
+                    break;
+                case 3:
+                    DisplayMainMenu();
+                    break;
+                    
+            }
             
 
 
@@ -176,9 +172,22 @@ namespace BattleArena
         /// </summary>
         void DisplayMainMenu()
         {
+            int choice = GetInput("play again?", "yes", "no");
 
-            GetPlayerName();
-            CharacterSelection();
+            if (choice == 1)
+            {
+                currentScene = 0;
+                currentEnemyIndex = 0;
+                currentEnemy = enemies[currentEnemyIndex];
+            }
+            else if (choice == 2)
+            {
+                gameOver = true;
+            }
+            
+
+            
+            
 
         }
 
@@ -190,12 +199,15 @@ namespace BattleArena
         {
             string input = "";
             Console.WriteLine("Welcome! Please enter your name.");
-            playerName = Console.ReadLine();
-            Console.WriteLine("You have entered, " + playerName );
-            GetInput("are you sure you want to keep this name?", "Yes", "No");
-            if (input == "1")
+            player.name = Console.ReadLine();
+
+            Console.Clear();
+
+            int choice = GetInput("you've enterd " + player.name + ". Are you sure you want to keep this name?", "Yes", "no");
+            
+            if (choice == 1)
             {
-                Console.WriteLine("welcome, " + playerName);
+                currentScene++;
             }
            
             
@@ -208,8 +220,22 @@ namespace BattleArena
         /// </summary>
         public void CharacterSelection()
         {
-            
-            GetInput("Choose your character", "Batman", "Robin");
+            int choice = GetInput("Welcome " + player.name + ".Choose your character", "Batman", "Robin");
+
+            if (choice == 1)
+            {
+                player.health = 200;
+                player.attackPower = 150;
+                player.defensePower = 150;
+                currentScene++;
+            }
+            else if (choice == 2)
+            {
+                player.health = 150;
+                player.attackPower = 100;
+                player.defensePower = 85;
+                currentScene++;
+            }
             
             
         }
@@ -225,6 +251,7 @@ namespace BattleArena
             Console.WriteLine("Health: " + character.health);
             Console.WriteLine("Attack: " + character.attackPower);
             Console.WriteLine("Defense: " + character.defensePower);
+            Console.WriteLine();
 
 
 
@@ -238,13 +265,13 @@ namespace BattleArena
         /// <returns>The amount of damage done to the defender</returns>
         float CalculateDamage(float attackPower, float defensePower)
         {
-            float damage = attackPower - defensePower;
-            if (damage <= 0)
+            float damageTaken = attackPower - defensePower;
+            if (damageTaken <= 0)
             {
-                damage = 0;
+                damageTaken = 0;
             }
 
-            return damage;
+            return damageTaken;
         }
 
         
@@ -259,8 +286,13 @@ namespace BattleArena
         {
             float damagetaken = CalculateDamage(attacker.attackPower, defender.defensePower);
             defender.health -= damagetaken;
-            Console.WriteLine(defender.name + " has taken " + damagetaken);
+
+            if (defender.health < 0)
+            {
+                defender.health = 0;
+            }
             return damagetaken;
+
             
         }
 
@@ -269,24 +301,34 @@ namespace BattleArena
         /// </summary>
         public void Battle()
         {
-            string matchResult = "No Contest";
-            while(Batman.health > 0 && MrFreeze.health > 0)
+            float damageDealt = 0;
+
+            DisplayStats(player);
+            DisplayStats(currentEnemy);
+
+            int choice = GetInput(  currentEnemy.name + " stands in front of you! what will you do?", "attack", "doge");
+
+            if (choice == 1)
             {
-                DisplayStats(Batman);
-
-                DisplayStats(MrFreeze);
-
-                float damagetaken = Attack(ref Batman, ref MrFreeze);
-                Console.WriteLine(Batman.name + " has taken " + damagetaken);
-
-                damagetaken = Attack(ref MrFreeze, ref Batman);
-                Console.WriteLine(Batman.name + " has taken " + damagetaken);
-
+                damageDealt = Attack(ref player, ref currentEnemy);
+                Console.WriteLine("You dealt " + damageDealt + " damage!");
+            }
+            else if (choice == 2)
+            {
+                Console.WriteLine("You dodged the enemy's attack!");
                 Console.ReadKey();
                 Console.Clear();
+                return;
+            }
+
+            damageDealt = Attack(ref currentEnemy, ref player);
+            Console.WriteLine("the " + currentEnemy.name + " dealt" + damageDealt, " damage!");
+
+            Console.ReadKey(true);
+            Console.Clear();
 
                 
-            }
+            
             
 
 
@@ -298,6 +340,33 @@ namespace BattleArena
         /// </summary>
         void CheckBattleResults()
         {
+            if(player.health <= 0)
+            {
+                Console.WriteLine("Gotham shall fall");
+                Console.ReadKey(true);
+                Console.Clear();
+                currentScene = 3;
+            }
+            else if (currentEnemy.health <= 0)
+            {
+                Console.WriteLine("You sent, " + currentEnemy.name + " Back to Arkham");
+                Console.ReadKey();
+                Console.Clear();
+                currentEnemyIndex++;
+
+                if (currentEnemyIndex >= enemies.Length)
+                {
+                    currentScene = 3;
+                    Console.WriteLine("You defeated all the villians");
+                    return;
+                }
+
+                currentEnemy = enemies[currentEnemyIndex];
+            }
+
+
+
+
         }
 
     }
