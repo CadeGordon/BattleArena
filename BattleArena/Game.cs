@@ -203,7 +203,7 @@ namespace BattleArena
 
             Console.Clear();
 
-            int choice = GetInput("you've enterd " + player.name + ". Are you sure you want to keep this name?", "Yes", "no");
+            int choice = GetInput("you've enterd " + player.name + " Are you sure you want to keep this name?", "Yes", "no");
             
             if (choice == 1)
             {
@@ -220,7 +220,7 @@ namespace BattleArena
         /// </summary>
         public void CharacterSelection()
         {
-            int choice = GetInput("Welcome " + player.name + ".Choose your character", "Batman", "Robin");
+            int choice = GetInput("Welcome " + player.name + " Choose your character", "Batman", "Robin");
 
             if (choice == 1)
             {
@@ -322,7 +322,7 @@ namespace BattleArena
             }
 
             damageDealt = Attack(ref currentEnemy, ref player);
-            Console.WriteLine("the " + currentEnemy.name + " dealt" + damageDealt, " damage!");
+            Console.WriteLine("the " + currentEnemy.name + " dealt " + damageDealt, " damage!");
 
             Console.ReadKey(true);
             Console.Clear();
