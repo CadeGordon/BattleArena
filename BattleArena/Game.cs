@@ -7,30 +7,20 @@ namespace BattleArena
     //Test
 
 
-    /// <summary>
-    /// Represents any entity that exists in game
-    /// </summary>
-    struct Character
-    {
-
-
-        public string name;
-        public float health;
-        public float attackPower;
-        public float defensePower;
-    }
+   
 
 
 
     class Game
     {
-        string playerName = "";
-        bool gameOver;
-        int currentScene;
-        Character player;
-        Character[] enemies;
-        private int currentEnemyIndex = 0;
-        private Character currentEnemy;
+        private string _playerName = "";
+        private bool _gameOver;
+        private int _currentScene;
+        private Entity _player;
+        private Entity[] _enemies;
+        private int _currentEnemyIndex = 0;
+        private Entity _currentEnemy;
+        private string playerName;
 
         
 
@@ -44,7 +34,7 @@ namespace BattleArena
         {
             Start();
 
-            while (!gameOver)
+            while (!_gameOver)
             {
                 Update();
             }
@@ -57,20 +47,27 @@ namespace BattleArena
         /// </summary>
         public void Start()
         {
-            gameOver = false;
-            currentScene = 0;
-            currentEnemyIndex = 0;
+            _gameOver = false;
+            _currentScene = 0;
+            InitalizeEnemies();
 
 
-            Character riddler = new Character { name = "Riddler", health = 50, attackPower = 180, defensePower = 35 };
+           
+        }
 
-            Character mrfreeze = new Character { name = "Mr.Freeze", health = 85, attackPower = 175, defensePower = 70 };
+        public void InitalizeEnemies()
+        {
+            _currentEnemyIndex = 0;
 
-            Character joker = new Character { name = "Joker", health = 120, attackPower = 195, defensePower = 60 };
+            Entity riddler = new Entity("Riddler", 50, 180, 35);
 
-            enemies = new Character[] { riddler, mrfreeze, joker };
+            Entity mrfreeze = new Entity("Mr. Freeze", 85, 175, 70);
 
-            currentEnemy = enemies[currentEnemyIndex];
+            Entity joker = new Entity("Joker", 120, 195, 60);
+
+            _enemies = new Entity[] { riddler, mrfreeze, joker };
+
+            _currentEnemy = _enemies[_currentEnemyIndex];
         }
 
         /// <summary>
@@ -89,7 +86,7 @@ namespace BattleArena
         public void End()
         {
 
-            Console.WriteLine("you saved gotham!!!");
+            Console.WriteLine("You saved Gotham!!!");
 
         }
 
@@ -145,7 +142,7 @@ namespace BattleArena
         /// </summary>
         void DisplayCurrentScene()
         {
-            switch (currentScene)
+            switch (_currentScene)
             {
                 case 0:
                     GetPlayerName();
@@ -172,17 +169,16 @@ namespace BattleArena
         /// </summary>
         void DisplayMainMenu()
         {
-            int choice = GetInput("play again?", "yes", "no");
+            int choice = GetInput("Would like to go back into Gotham?", "Yes", "No");
 
             if (choice == 1)
             {
-                currentScene = 0;
-                currentEnemyIndex = 0;
-                currentEnemy = enemies[currentEnemyIndex];
+                _currentScene = 0;
+                InitalizeEnemies();
             }
             else if (choice == 2)
             {
-                gameOver = true;
+                _gameOver = true;
             }
             
 
@@ -199,15 +195,15 @@ namespace BattleArena
         {
             string input = "";
             Console.WriteLine("Welcome! Please enter your name.");
-            player.name = Console.ReadLine();
+            _playerName = Console.ReadLine();
 
             Console.Clear();
 
-            int choice = GetInput("you've enterd " + player.name + " Are you sure you want to keep this name?", "Yes", "no");
+            int choice = GetInput("You've entered " + _playerName + ", are you sure you want to keep this name?", "Yes", "No");
             
             if (choice == 1)
             {
-                currentScene++;
+                _currentScene++;
             }
            
             
@@ -220,21 +216,17 @@ namespace BattleArena
         /// </summary>
         public void CharacterSelection()
         {
-            int choice = GetInput("Welcome " + player.name + " Choose your character", "Batman", "Robin");
+            int choice = GetInput("Welcome to Gotham " + _playerName + ", choose your character", "Batman", "Robin");
 
             if (choice == 1)
             {
-                player.health = 200;
-                player.attackPower = 150;
-                player.defensePower = 150;
-                currentScene++;
+                _player = new Entity(_playerName, 200, 150, 150);
+                _currentScene++;
             }
             else if (choice == 2)
             {
-                player.health = 150;
-                player.attackPower = 100;
-                player.defensePower = 85;
-                currentScene++;
+                _player = new Entity(_playerName, 150, 100, 85);
+                _currentScene++;
             }
             
             
@@ -244,57 +236,20 @@ namespace BattleArena
         /// Prints a characters stats to the console
         /// </summary>
         /// <param name="character">The character that will have its stats shown</param>
-        void DisplayStats(Character character)
+        void DisplayStats(Entity character)
         {
 
-            Console.WriteLine("Name: " + character.name);
-            Console.WriteLine("Health: " + character.health);
-            Console.WriteLine("Attack: " + character.attackPower);
-            Console.WriteLine("Defense: " + character.defensePower);
+            Console.WriteLine("Name: " + character.Name);
+            Console.WriteLine("Health: " + character.Health);
+            Console.WriteLine("Attack: " + character.AttackPower);
+            Console.WriteLine("Defense: " + character.DefensePower);
             Console.WriteLine();
 
 
 
         }
 
-        /// <summary>
-        /// Calculates the amount of damage that will be done to a character
-        /// </summary>
-        /// <param name="attackPower">The attacking character's attack power</param>
-        /// <param name="defensePower">The defending character's defense power</param>
-        /// <returns>The amount of damage done to the defender</returns>
-        float CalculateDamage(float attackPower, float defensePower)
-        {
-            float damageTaken = attackPower - defensePower;
-            if (damageTaken <= 0)
-            {
-                damageTaken = 0;
-            }
-
-            return damageTaken;
-        }
-
-        
-
-        /// <summary>
-        /// Deals damage to a character based on an attacker's attack power
-        /// </summary>
-        /// <param name="attacker">The character that initiated the attack</param>
-        /// <param name="defender">The character that is being attacked</param>
-        /// <returns>The amount of damage done to the defender</returns>
-        public float Attack(ref Character attacker, ref Character defender)
-        {
-            float damagetaken = CalculateDamage(attacker.attackPower, defender.defensePower);
-            defender.health -= damagetaken;
-
-            if (defender.health < 0)
-            {
-                defender.health = 0;
-            }
-            return damagetaken;
-
-            
-        }
+       
 
         /// <summary>
         /// Simulates one turn in the current monster fight
@@ -303,26 +258,26 @@ namespace BattleArena
         {
             float damageDealt = 0;
 
-            DisplayStats(player);
-            DisplayStats(currentEnemy);
+            DisplayStats(_player);
+            DisplayStats(_currentEnemy);
 
-            int choice = GetInput(  currentEnemy.name + " stands in front of you! what will you do?", "attack", "doge");
+            int choice = GetInput(  _currentEnemy.Name + " stands in front of you! What will you do?", "Attack", "Dodge");
 
             if (choice == 1)
             {
-                damageDealt = Attack(ref player, ref currentEnemy);
+                damageDealt = _player.Attack(_currentEnemy);
                 Console.WriteLine("You dealt " + damageDealt + " damage!");
             }
             else if (choice == 2)
             {
-                Console.WriteLine("You dodged the enemy's attack!");
+                Console.WriteLine("You dodged the enemies attack!");
                 Console.ReadKey();
                 Console.Clear();
                 return;
             }
 
-            damageDealt = Attack(ref currentEnemy, ref player);
-            Console.WriteLine("the " + currentEnemy.name + " dealt " + damageDealt, " damage!");
+            damageDealt = _currentEnemy.Attack(_player);
+            Console.WriteLine( _currentEnemy.Name + " dealt " + damageDealt + " damage!");
 
             Console.ReadKey(true);
             Console.Clear();
@@ -340,28 +295,28 @@ namespace BattleArena
         /// </summary>
         void CheckBattleResults()
         {
-            if(player.health <= 0)
+            if(_player.Health <= 0)
             {
-                Console.WriteLine("Gotham shall fall");
+                Console.WriteLine("You have failed and now Gotham shall fall!!!");
                 Console.ReadKey(true);
                 Console.Clear();
-                currentScene = 3;
+                _currentScene = 3;
             }
-            else if (currentEnemy.health <= 0)
+            else if (_currentEnemy.Health <= 0)
             {
-                Console.WriteLine("You sent, " + currentEnemy.name + " Back to Arkham");
+                Console.WriteLine("You sent " + _currentEnemy.Name + " back to Arkham");
                 Console.ReadKey();
                 Console.Clear();
-                currentEnemyIndex++;
+                _currentEnemyIndex++;
 
-                if (currentEnemyIndex >= enemies.Length)
+                if (_currentEnemyIndex >= _enemies.Length)
                 {
-                    currentScene = 3;
-                    Console.WriteLine("You defeated all the villians");
+                    _currentScene = 3;
+                    Console.WriteLine("You defeated all the escaped villains and sent them back to Arkham");
                     return;
                 }
 
-                currentEnemy = enemies[currentEnemyIndex];
+                _currentEnemy = _enemies[_currentEnemyIndex];
             }
 
 
