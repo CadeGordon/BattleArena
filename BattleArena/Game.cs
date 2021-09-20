@@ -18,18 +18,34 @@ namespace BattleArena
 
     class Game
     {
-        private string _playerName = "";
         private bool _gameOver;
         private int _currentScene;
         private Player _player;
         private Entity[] _enemies;
         private int _currentEnemyIndex = 0;
         private Entity _currentEnemy;
-        private string playerName;
+        private string _playerName;
         private Item[] _batmanItems;
         private Item[] _robinItems;
 
+        int[] AppendToArray(int[] arr, int value)
+        {
+            //Create a new array with one more slot than the old array
+            int[] tempArray = new int[arr.Length + 1];
 
+            //Copy the values from the old array into the new array
+            for (int i = 0; i < arr.Length; i++)
+            {
+                tempArray[i] = arr[i];
+
+            }
+
+            //Set the last index to be the new item
+            tempArray[tempArray.Length - 1] = value;
+
+            //return the new array
+            return tempArray;
+        }
         
 
         
@@ -40,6 +56,10 @@ namespace BattleArena
         /// </summary>
         public void Run()
         {
+            int[] numbers = new int[] { 1, 2, 3, 4 };
+
+            numbers = AppendToArray(numbers, 5);
+
             Start();
 
             while (!_gameOver)
@@ -108,6 +128,7 @@ namespace BattleArena
         {
 
             Console.WriteLine("You saved Gotham!!!");
+            Console.ReadKey(true);
 
         }
 
@@ -129,9 +150,29 @@ namespace BattleArena
                 Console.WriteLine(description);
                 for (int i = 0; i < options.Length; i++)
                 {
-                   
+                    Console.WriteLine((i + 1) + ". " + options[i]);
+                }
+                Console.WriteLine("> ");
+
+                //get input from player
+                input = Console.ReadLine();
+
+                //If the player typed an int...
+                if(int.TryParse(input, out inputRecieved))
+                {
+                    //...decrement the input and check if it's within the bounds of the array
+                    inputRecieved--;
+                    if(inputRecieved < 0 || inputRecieved >= options.Length)
+                    {
+                        //set input recieved to be the default value
+                        inputRecieved = -1;
+                        //display error message
+                        Console.WriteLine("Invalid Input");
+                        Console.ReadKey(true);
+                    }
                 }
             }
+            return inputRecieved;
         }
 
         /// <summary>
@@ -190,7 +231,7 @@ namespace BattleArena
         /// </summary>
         void GetPlayerName()
         {
-            string input = "";
+            
             Console.WriteLine("Welcome! Please enter your name.");
             _playerName = Console.ReadLine();
 
