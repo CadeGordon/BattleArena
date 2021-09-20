@@ -4,11 +4,20 @@ using System.Text;
 
 namespace BattleArena
 {
+    public enum ItemType
+    {
+        DEFENSE,
+        ATTACK,
+        NONE
+    }
+
+
     //Test
     public struct Item
     {
         public string Name;
         public float StatBoost;
+        public ItemType Type;
     }
 
 
@@ -28,24 +37,7 @@ namespace BattleArena
         private Item[] _batmanItems;
         private Item[] _robinItems;
 
-        int[] AppendToArray(int[] arr, int value)
-        {
-            //Create a new array with one more slot than the old array
-            int[] tempArray = new int[arr.Length + 1];
-
-            //Copy the values from the old array into the new array
-            for (int i = 0; i < arr.Length; i++)
-            {
-                tempArray[i] = arr[i];
-
-            }
-
-            //Set the last index to be the new item
-            tempArray[tempArray.Length - 1] = value;
-
-            //return the new array
-            return tempArray;
-        }
+        
         
 
         
@@ -56,9 +48,6 @@ namespace BattleArena
         /// </summary>
         public void Run()
         {
-            int[] numbers = new int[] { 1, 2, 3, 4 };
-
-            numbers = AppendToArray(numbers, 5);
 
             Start();
 
@@ -84,12 +73,12 @@ namespace BattleArena
         public void InitializeItems()
         {
             //Batman Gadgets
-            Item grapplingHook = new Item { Name = "Grappling Hook", StatBoost = 5 };
-            Item batterRang = new Item { Name = "BatterRang", StatBoost = 10 };
+            Item grapplingHook = new Item { Name = "Grappling Hook", StatBoost = 5, ItemType = 1 };
+            Item batterRang = new Item { Name = "BatterRang", StatBoost = 10, ItemType = 0 };
 
             //Robin Gadgets
-            Item bowStaff = new Item { Name = "Bow Staff", StatBoost = 10 };
-            Item throwingBird = new Item { Name = "Throwing Bird", StatBoost = 5 };
+            Item bowStaff = new Item { Name = "Bow Staff", StatBoost = 10, ItemType = 1 };
+            Item throwingBird = new Item { Name = "Throwing Bird", StatBoost = 5, ItemType = 0 };
 
             //Initialize arrays
             _batmanItems = new Item[] { grapplingHook, batterRang };
@@ -171,7 +160,18 @@ namespace BattleArena
                         Console.ReadKey(true);
                     }
                 }
+                //if the player didnt type and int
+                else
+                {
+                    //Set input recieved to be the default value
+                    inputRecieved = -1;
+                    Console.WriteLine("inavlid input");
+                    Console.ReadKey(true);
+                }
+
+                Console.Clear();
             }
+
             return inputRecieved;
         }
 
@@ -209,12 +209,12 @@ namespace BattleArena
         {
             int choice = GetInput("Would like to go back into Gotham?", "Yes", "No");
 
-            if (choice == 1)
+            if (choice == 0)
             {
                 _currentScene = 0;
                 InitalizeEnemies();
             }
-            else if (choice == 2)
+            else if (choice == 1)
             {
                 _gameOver = true;
             }
@@ -239,7 +239,7 @@ namespace BattleArena
 
             int choice = GetInput("You've entered " + _playerName + ", are you sure you want to keep this name?", "Yes", "No");
             
-            if (choice == 1)
+            if (choice == 0)
             {
                 _currentScene++;
             }
@@ -256,12 +256,12 @@ namespace BattleArena
         {
             int choice = GetInput("Welcome to Gotham " + _playerName + ", choose your character", "Batman", "Robin");
 
-            if (choice == 1)
+            if (choice == 0)
             {
                 _player = new Player(_playerName, 200, 150, 150, _batmanItems);
                 _currentScene++;
             }
-            else if (choice == 2)
+            else if (choice == 1)
             {
                 _player = new Player(_playerName, 150, 100, 85, _robinItems);
                 _currentScene++;
@@ -287,7 +287,19 @@ namespace BattleArena
 
         }
 
-       
+       public void DisplayEquipitemMenu()
+        {
+            //Get item index
+            int choice = GetInput("Select and item to equip.", _player.GetItemNames());
+
+            //Equip item at given index
+            if (!_player.TryEquipItem(choice))
+                Console.WriteLine("You couldny find that item in you bag.");
+
+
+            //Print feedback
+            Console.WriteLine("You equipped " + _player.CurrentItem.Name + "!");
+        }
 
         /// <summary>
         /// Simulates one turn in the current monster fight
@@ -299,16 +311,16 @@ namespace BattleArena
             DisplayStats(_player);
             DisplayStats(_currentEnemy);
 
-            int choice = GetInput(  _currentEnemy.Name + " stands in front of you! What will you do?", "Attack", "Equip Item");
+            int choice = GetInput(  _currentEnemy.Name + " stands in front of you! What will you do?", "Attack", "Equip Item", "Remove Current Item");
 
-            if (choice == 1)
+            if (choice == 0)
             {
                 damageDealt = _player.Attack(_currentEnemy);
                 Console.WriteLine("You dealt " + damageDealt + " damage!");
             }
-            else if (choice == 2)
+            else if (choice == 1)
             {
-                Console.WriteLine("You dodged the enemies attack!");
+                DisplayEquipitemMenu();
                 Console.ReadKey();
                 Console.Clear();
                 return;
