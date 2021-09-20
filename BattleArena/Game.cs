@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace BattleArena
 {
@@ -73,12 +74,12 @@ namespace BattleArena
         public void InitializeItems()
         {
             //Batman Gadgets
-            Item grapplingHook = new Item { Name = "Grappling Hook", StatBoost = 5, ItemType = 1 };
-            Item batterRang = new Item { Name = "BatterRang", StatBoost = 10, ItemType = 0 };
+            Item grapplingHook = new Item { Name = "Grappling Hook", StatBoost = 5, Type = ItemType.DEFENSE };
+            Item batterRang = new Item { Name = "BatterRang", StatBoost = 10, Type = ItemType.ATTACK };
 
             //Robin Gadgets
-            Item bowStaff = new Item { Name = "Bow Staff", StatBoost = 10, ItemType = 1 };
-            Item throwingBird = new Item { Name = "Throwing Bird", StatBoost = 5, ItemType = 0 };
+            Item bowStaff = new Item { Name = "Bow Staff", StatBoost = 10, Type = ItemType.ATTACK };
+            Item throwingBird = new Item { Name = "Throwing Bird", StatBoost = 5, Type = ItemType.DEFENSE };
 
             //Initialize arrays
             _batmanItems = new Item[] { grapplingHook, batterRang };
@@ -119,6 +120,22 @@ namespace BattleArena
             Console.WriteLine("You saved Gotham!!!");
             Console.ReadKey(true);
 
+        }
+
+        public void Save()
+        {
+            //Creat a new stream writer
+            StreamWriter writer = new StreamWriter("SaveData.txt");
+
+            //Save current enemy index
+            writer.WriteLine(_currentEnemyIndex);
+
+            //Save player and enemy stats
+            _player.Save(writer);
+            _currentEnemy.Save(writer);
+
+            //Close writer when done saving
+            writer.Close();
         }
 
         /// <summary>
@@ -287,14 +304,14 @@ namespace BattleArena
 
         }
 
-       public void DisplayEquipitemMenu()
+        public void DisplayEquipitemMenu()
         {
             //Get item index
             int choice = GetInput("Select and item to equip.", _player.GetItemNames());
 
             //Equip item at given index
             if (!_player.TryEquipItem(choice))
-                Console.WriteLine("You couldny find that item in you bag.");
+                Console.WriteLine("You couldnt find that item in you utility belt.");
 
 
             //Print feedback
@@ -311,7 +328,7 @@ namespace BattleArena
             DisplayStats(_player);
             DisplayStats(_currentEnemy);
 
-            int choice = GetInput(  _currentEnemy.Name + " stands in front of you! What will you do?", "Attack", "Equip Item", "Remove Current Item");
+            int choice = GetInput(  _currentEnemy.Name + " stands in front of you! What will you do?", "Attack", "Equip Item", "Remove Current Item", "Save");
 
             if (choice == 0)
             {
@@ -322,6 +339,25 @@ namespace BattleArena
             {
                 DisplayEquipitemMenu();
                 Console.ReadKey();
+                Console.Clear();
+                return;
+            }
+            else if (choice == 2)
+            {
+                if (!_player.TryRemoveCurrentItem())
+                    Console.WriteLine("You dont have anything equipped.");
+                else
+                    Console.WriteLine("You place the item in your utility belt");
+
+                Console.ReadKey(true);
+                Console.Clear();
+                return;
+            }
+            else if (choice == 3)
+            {
+                Save();
+                Console.WriteLine("Saved Game");
+                Console.ReadKey(true);
                 Console.Clear();
                 return;
             }
