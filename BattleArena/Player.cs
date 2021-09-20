@@ -10,6 +10,7 @@ namespace BattleArena
         private Item[] _items;
         private Item _currentItem;
         private int _currentItemIndex;
+        private string _job;
 
         public override float AttackPower
         {
@@ -42,11 +43,44 @@ namespace BattleArena
 
         }
 
-        public Player(string name, float health, float attackPower, float defensePower, Item[] items) : base(name, health, attackPower, defensePower)
+        public string Job
+        {
+            get
+            {
+                return _job;
+            }
+            set
+            {
+                _job = value;
+            }
+        }
+
+        public Player()
+        {
+            _items = new Item[0];
+            _currentItem.Name = "Nothing";
+            _currentItemIndex = -1;
+        }
+
+        public Player(Item[] items) : base()
+        {
+            _currentItem.Name = "Nothing";
+            _items = items;
+            _currentItemIndex = -1;
+        }
+
+
+        public Player(string name, float health, float attackPower, float defensePower, Item[] items, string job) : base(name, health, attackPower, defensePower)
         {
             _items = items;
             _currentItem.Name = "Nothing";
+            _job = job;
+            _currentItemIndex = -1;
         }
+
+        
+
+
         /// <summary>
         /// Sets the item at the given index to be the current item 
         /// </summary>
@@ -93,6 +127,8 @@ namespace BattleArena
         }
 
         
+
+        
         /// <returns>The names of all items in the players inventory</returns>
         public string[] GetItemNames()
         {
@@ -108,9 +144,27 @@ namespace BattleArena
 
         public override void Save(StreamWriter writer)
         {
+            writer.WriteLine(_job);
             base.Save(writer);
             writer.WriteLine(_currentItemIndex);
+            
         }
 
+        public override bool Load(StreamReader reader)
+        {
+            //If the base loading function fails...
+            if (!base.Load(reader))
+                //return false
+                return false;
+
+            //if the current line cant be converted into an int...
+            if (!int.TryParse(reader.ReadLine(), out _currentItemIndex))
+                //...return false
+                return false;
+            
+            //Return whether or not the item was equipped successfully
+            return TryEquipItem(_currentItemIndex);
+
+        }
     }
 }

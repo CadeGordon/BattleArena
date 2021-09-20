@@ -12,6 +12,15 @@ namespace BattleArena
         NONE
     }
 
+    public enum Scene
+    {
+        STARTMENU,
+        NAMECREATION,
+        CHARACTERSELECTION,
+        BATTLE,
+        RESTARTMENU
+    }
+
 
     //Test
     public struct Item
@@ -29,7 +38,7 @@ namespace BattleArena
     class Game
     {
         private bool _gameOver;
-        private int _currentScene;
+        private Scene _currentScene;
         private Player _player;
         private Entity[] _enemies;
         private int _currentEnemyIndex = 0;
@@ -138,6 +147,51 @@ namespace BattleArena
             writer.Close();
         }
 
+        public bool Load()
+        {
+            bool loadSuccessful = true;
+            //If the file doesnt exist...
+            if (!File.Exists("SaveData.txt"))
+            {
+                loadSuccessful = false;
+            }
+
+            //Create a new reader to read from the text file
+            StreamReader reader = new StreamReader("SaveData.txt");
+
+            //If the file line cant be converted be into an integer
+            if (!int.TryParse(reader.ReadLine(), out _currentEnemyIndex))
+                //...return false
+                return false;
+
+            string job = reader.ReadLine();
+
+            if (job == "Batman")
+                _player = new Player(_batmanItems);
+            else if (job == "Robin")
+                _player = new Player(_robinItems);
+            else
+                loadSuccessful = false;
+
+            _player.Job = job;
+            
+            if (!_player.Load(reader))
+                loadSuccessful = false;
+
+            //Create a new instacne and try load the enemy
+            _currentEnemy = new Entity();
+            if (!_currentEnemy.Load(reader))
+                loadSuccessful = false;
+
+            //update the array to match the current enemy stats
+            _enemies[_currentEnemyIndex] = _currentEnemy;
+
+            //Close the reader once loading is finished
+            reader.Close();
+
+            return loadSuccessful;
+        }
+
         /// <summary>
         /// Gets an input from the player based on some given decision
         /// </summary>
@@ -199,18 +253,21 @@ namespace BattleArena
         {
             switch (_currentScene)
             {
-                case 0:
+                case Scene.STARTMENU:
+                    DisplayStartMenu();
+                    break;
+                case Scene.NAMECREATION:
                     GetPlayerName();
                     break;
-                case 1:
-                    CharacterSelection();
+                case Scene.CHARACTERSELECTION:
+                   CharacterSelection();
                     break;
-                case 2:
-                    Battle();
+                case Scene.BATTLE:
+                     Battle();
                     CheckBattleResults();
                     break;
-                case 3:
-                    DisplayMainMenu();
+                case Scene.RESTARTMENU:
+                    DisplayRestartMenu();
                     break;
                     
             }
@@ -222,7 +279,7 @@ namespace BattleArena
         /// <summary>
         /// Displays the menu that allows the player to start or quit the game
         /// </summary>
-        void DisplayMainMenu()
+        void DisplayRestartMenu()
         {
             int choice = GetInput("Would like to go back into Gotham?", "Yes", "No");
 
@@ -240,6 +297,33 @@ namespace BattleArena
             
             
 
+        }
+
+        public void DisplayStartMenu()
+        {
+            int choice = GetInput("Welcome to Gotham Protectors ", "Start New Game", "Load Game");
+
+            if (choice == 0)
+            {
+                _currentScene = Scene.NAMECREATION;
+            }
+            else if (choice == 1)
+            {
+                if (Load())
+                {
+                    Console.WriteLine("Load Succesful");
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    _currentScene = Scene.BATTLE;
+                }
+                else
+                {
+                    Console.WriteLine("Load Failed");
+                    Console.ReadKey(true);
+                    Console.Clear();
+                    
+                }
+            }
         }
 
         /// <summary>
@@ -275,12 +359,12 @@ namespace BattleArena
 
             if (choice == 0)
             {
-                _player = new Player(_playerName, 200, 150, 150, _batmanItems);
+                _player = new Player(_playerName, 200, 150, 150, _batmanItems, "Batman");
                 _currentScene++;
             }
             else if (choice == 1)
             {
-                _player = new Player(_playerName, 150, 100, 85, _robinItems);
+                _player = new Player(_playerName, 150, 100, 85, _robinItems, "Robin");
                 _currentScene++;
             }
             
@@ -386,7 +470,7 @@ namespace BattleArena
                 Console.WriteLine("You have failed and now Gotham shall fall!!!");
                 Console.ReadKey(true);
                 Console.Clear();
-                _currentScene = 3;
+                _currentScene = Scene.RESTARTMENU;
             }
             else if (_currentEnemy.Health <= 0)
             {
@@ -397,7 +481,7 @@ namespace BattleArena
 
                 if (_currentEnemyIndex >= _enemies.Length)
                 {
-                    _currentScene = 3;
+                    _currentScene = Scene.RESTARTMENU;
                     Console.WriteLine("You defeated all the escaped villains and sent them back to Arkham");
                     return;
                 }
